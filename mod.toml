@@ -1,0 +1,48 @@
+[manifest]
+id = "day_night_cycle"
+version = "1.0.0"
+display_name = "Day Night Cycle"
+description = "Introduces a day-night cycle into DK64 globally"
+short_description = "Introduces a day-night cycle into DK64 globally"
+authors = [ "Ballaam" ]
+game_id = "dk64"
+minimum_recomp_version = "1.0.0"
+
+[[manifest.config_options]]
+id = "sunset_enabled"
+name = "Sunset/sunrise effect"
+description = "Controls whether the sky will briefly turn pink during sunset/sunrise"
+type = "Enum"
+options = [ "Disabled", "Enabled" ]
+default = "Enabled"
+
+[[manifest.config_options]]
+id = "cycle_length"
+name = "Cycle Length"
+description = "Controls the length of the day-night cycle in minutes"
+type = "Number"
+min = 1
+max = 60
+step = 1
+precision = 1
+percent = false
+default = 10
+
+[[manifest.config_options]]
+id = "night_darkness"
+name = "Night Darkness"
+description = "Controls how dark night is. 0 = Fully dark, 30 = Fungi Night levels of darkness"
+type = "Number"
+min = 0
+max = 30
+step = 1
+precision = 1
+percent = false
+default = 10
+
+[inputs]
+elf_path = "build/mod.elf"
+mod_filename = "day_night_cycle"
+func_reference_syms_file = "Dk64Syms/dump.toml"
+data_reference_syms_files = [ "Dk64Syms/data_dump.toml" ]
+additional_files = ["thumb.dds"]
