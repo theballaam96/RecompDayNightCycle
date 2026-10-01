@@ -3,6 +3,7 @@
 #include "enums.h"
 #include "common_structs.h"
 #include "recompconfig.h"
+#include "repy_api.h"
 
 typedef struct {
     u8  loaded;
@@ -61,12 +62,51 @@ s32 getCycleLength(void) {
     return 60 * recomp_get_config_u32("cycle_length");
 }
 
+static s32 pc_seconds = -1;
+static u32 pc_refresh_timer = 0;
+
+s32 getRealClockTimeSeconds(void)
+{
+s32 ret;
+
+REPY_FN_SETUP;
+REPY_FN_EXEC_CACHE(system_time,
+        "import time\n"
+        "try:\n"
+        "    t = time.localtime()\n"
+        "    pc_seconds = t.tm_hour * 3600 + t.tm_min * 60 + t.tm_sec\n"
+        "except Exception:\n"
+        "    pc_seconds = -1\n"
+);
+ret = REPY_FN_GET_U32("pc_seconds");
+REPY_FN_CLEANUP;
+return ret;
+}
+
 f32 getDayNightPhase(u8 *stg) {
     u32 igt;
     s32 phase;
     s32 cycle_length;
     f32 seconds;
+    char time_synced = FALSE;
 
+    if (recomp_get_config_u32("real_clock_sync")) {
+        if (pc_refresh_timer == 0) {
+            pc_seconds = getRealClockTimeSeconds();
+            pc_refresh_timer = 30;
+        }
+        pc_refresh_timer--;
+ 
+        if (pc_seconds >= 0) {
+            phase = (((pc_seconds + 43200) % 86400) * 4096) / 86400; // Start at +12 hours, multiply by the phase's max 4096, then divide by amount of seconds in day.
+            phase &= 0xFFF;
+            time_synced = TRUE;
+        }
+    } else {
+        pc_refresh_timer = 0;
+    }
+
+if (!time_synced){
     // 0 = Night
     // 1 = Day
     igt = func_global_asm_805FC98C();
@@ -79,6 +119,8 @@ f32 getDayNightPhase(u8 *stg) {
     seconds += (sub_ticker / 30.0f);
     phase = (seconds / (f32)(cycle_length)) * 4096;
     phase &= 0xFFF;
+}
+
     if (phase < 2048) {
         *stg = 1;
     } else {

@@ -7,6 +7,7 @@ short_description = "Introduces a day-night cycle into DK64 globally"
 authors = [ "Ballaam" ]
 game_id = "dk64"
 minimum_recomp_version = "1.0.0"
+dependencies = ["RecompExternalPython_API:2.0.0"] 
 
 [[manifest.config_options]]
 id = "sunset_enabled"
@@ -39,6 +40,14 @@ step = 1
 precision = 1
 percent = false
 default = 10
+
+[[manifest.config_options]]
+id = "real_clock_sync"
+name = "Sync to System clock"
+description = "Syncs the time of day to the System time. Overrides Cycle Length option."
+type = "Enum"
+options = ["Disabled", "Enabled"]
+default = "Disabled"
 
 [inputs]
 elf_path = "build/mod.elf"
